@@ -9,21 +9,31 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_BUILD_TYPE Release)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+
 
 project(eva
     VERSION 1.0.1
     LANGUAGES CXX
 )
 
+
 option(USE_GALOIS "Use the Galois library for multicore homomorphic evaluation" OFF)
+set(USE_GALOIS ON)
 if(USE_GALOIS)
   message("Galois based multicore support enabled")
   add_definitions(-DEVA_USE_GALOIS)
 endif()
 
-find_package(SEAL 3.6 REQUIRED)
+set(SEAL_DIR /home/yuantong/EVA-SEAL4/extern/SEAL)
+find_package(SEAL 4.1.1 REQUIRED EXACT REQUIRED PATHS /home/yuantong/EVA-SEAL4/extern/SEAL NO_DEFAULT_PATH)
 find_package(Protobuf 3.6 REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
+find_package(OpenMP)
+
+
 
 if(NOT Python_VERSION_MAJOR EQUAL 3)
     message(FATAL_ERROR "EVA requires Python 3. Please ensure you have it
@@ -37,3 +47,7 @@ endif()
 
 add_subdirectory(eva)
 add_subdirectory(python)
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(eva PUBLIC OpenMP::OpenMP_CXX)
+endif()
