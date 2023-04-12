@@ -21,6 +21,15 @@ using namespace std;
 
 namespace eva {
 
+void SEALValuation::SetValue(std::string name, seal::Ciphertext ciphertext) {
+  values[name] = ciphertext;
+}
+
+int SEALValuation::GetScale(std::string name) {
+  seal::Ciphertext ciphertext = std::get<seal::Ciphertext>(values[name]);
+  return ciphertext.scale();
+}
+
 SEALValuation SEALPublic::encrypt(const Valuation &inputs,
                                   const CKKSSignature &signature) {
   size_t slotCount = encoder.slot_count();

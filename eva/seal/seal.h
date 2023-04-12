@@ -33,6 +33,9 @@ public:
   auto end() { return values.end(); }
   auto end() const { return values.end(); }
 
+  void SetValue(std::string name, seal::Ciphertext ciphertext);
+  int GetScale(std::string name);
+
 private:
   seal::EncryptionParameters params;
   std::unordered_map<std::string, SchemeValue> values;
