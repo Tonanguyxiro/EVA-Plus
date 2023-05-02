@@ -84,19 +84,37 @@ public:
     // similar scale will likely end up having the same level in typical
     // rescaling policies, which helps the sorting group terms of the same level
     // together.
+
     if (term->numOperands() == 0) {
       scale[term] = term->get<EncodeAtScaleAttribute>();
     } else if (term->op == Op::Mul) {
-      scale[term] = std::accumulate(
-          term->getOperands().begin(), term->getOperands().end(), 0,
-          [&](auto &sum, auto &operand) { return sum + scale.at(operand); });
-    } else {
       scale[term] = std::accumulate(term->getOperands().begin(),
-                                    term->getOperands().end(), 0,
-                                    [&](auto &max, auto &operand) {
-                                      return std::max(max, scale.at(operand));
+                                    term->getOperands().end(), 0.0,
+                                    [&](const auto &sum, const auto &operand) {
+                                      return sum + scale.at(operand);
                                     });
+    } else {
+      scale[term] = std::accumulate(
+          term->getOperands().begin(), term->getOperands().end(), 0.0,
+          [&](const auto &max, const auto &operand) {
+            return std::max(max, (double)scale.at(operand));
+          });
     }
+
+    // if (term->numOperands() == 0) {
+    //   scale[term] = term->get<EncodeAtScaleAttribute>();
+    // } else if (term->op == Op::Mul) {
+    //   scale[term] = std::accumulate(
+    //       term->getOperands().begin(), term->getOperands().end(), 0,
+    //       [&](auto &sum, auto &operand) { return sum + scale.at(operand); });
+    // } else {
+    //   scale[term] = std::accumulate(term->getOperands().begin(),
+    //                                 term->getOperands().end(), 0,
+    //                                 [&](auto &max, auto &operand) {
+    //                                   return std::max(max,
+    //                                   scale.at(operand));
+    //                                 });
+    // }
 
     if (isReductionOp(term->op) && term->numOperands() > 2) {
       // We sort operands into constants, plaintext and raw, then ciphertexts by
