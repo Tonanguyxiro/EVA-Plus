@@ -56,6 +56,7 @@ public:
                         const CKKSSignature &signature);
 
   SEALValuation execute(Program &program, const SEALValuation &inputs);
+  seal::SEALContext get_context();
 
 private:
   seal::SEALContext context;

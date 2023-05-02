@@ -30,10 +30,16 @@ int SEALValuation::GetScale(std::string name) {
   return ciphertext.scale();
 }
 
+seal::SEALContext SEALPublic::get_context()
+{
+  return context;
+}
+
 SEALValuation SEALPublic::encrypt(const Valuation &inputs,
                                   const CKKSSignature &signature) {
   size_t slotCount = encoder.slot_count();
   if (slotCount < signature.vecSize) {
+    printf("Vector size (%d) cannot be larger than slot count(%zu)\n", signature.vecSize, slotCount);
     throw runtime_error("Vector size cannot be larger than slot count");
   }
   if (slotCount % signature.vecSize != 0) {
