@@ -27,13 +27,12 @@ if(USE_GALOIS)
   add_definitions(-DEVA_USE_GALOIS)
 endif()
 
-set(SEAL_DIR /home/yuantong/EVA-SEAL4/extern/SEAL)
-find_package(SEAL 4.1.1 REQUIRED EXACT REQUIRED PATHS /home/yuantong/EVA-SEAL4/extern/SEAL NO_DEFAULT_PATH)
+set(SEAL_DIR ${PROJECT_SOURCE_DIR}/../SEAL)
+find_package(SEAL 4.1.1 REQUIRED EXACT REQUIRED PATHS ${PROJECT_SOURCE_DIR}/../SEAL NO_DEFAULT_PATH)
+message("Use seal at ${SEAL_DIR}")
 find_package(Protobuf 3.6 REQUIRED)
 find_package(Python COMPONENTS Interpreter Development)
 find_package(OpenMP)
-
-
 
 if(NOT Python_VERSION_MAJOR EQUAL 3)
     message(FATAL_ERROR "EVA requires Python 3. Please ensure you have it
@@ -46,7 +45,7 @@ if(USE_GALOIS)
 endif()
 
 add_subdirectory(eva)
-add_subdirectory(python)
+# add_subdirectory(python)
 
 if(OpenMP_CXX_FOUND)
     target_link_libraries(eva PUBLIC OpenMP::OpenMP_CXX)
