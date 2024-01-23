@@ -24,26 +24,57 @@ EVA targets [Microsoft SEAL](https://github.com/microsoft/SEAL) — the industry
 
 ## Getting Started with Docker
 
+### Create Image
+
+To make the development more simple, I establish a docker.
+
 Build image
 
 ```bash
 docker build -t eva:latest .
 ```
 
-Rebuild image
+If you want to rebuild image without cash
 
 ```bash
 docker build --no-cache -t eva:latest .
 ```
 
-Create / Start container
+### Using container
+
+Create container,
 
 ```bash
-docker run -it --name eva eva:latest
+docker run -v $(pwd):/EVA -it --name eva eva:latest
+```
+
+Start container
+
+```bash
+docker start -i eva
+```
+
+### Development
+
+You can now development eva and install it after start the container:
+
+```bash
+cd EVA
+git submodule update --init
+mkdir build && cd build
+cmake ..
+make -j
+```
+
+And then install pyEVA:
+
+```bash
+pip install numpy # the only package you need to install
+python3 -m pip install -e build/python/
 ```
 
 
-## Getting Started
+## Getting Started without Docker
 
 EVA is a native library written in C++17 with bindings for Python. Both Linux and Windows are supported. The instructions below show how to get started with EVA on Ubuntu. For building on Windows [EVA's Azure Pipelines script](azure-pipelines.yml) is a useful reference.
 
@@ -72,36 +103,6 @@ cmake -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF .
 make -j
 sudo make install
 ```
-
-To make the envrionment clean, we can use seal as a separete library, hence we need to do following
-
-First install the SEAL with
-
-```bash
-cmake -S . -B build -DCMAKE_INSTALL_PREFIX=~/mylibs
-cmake -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF --build build
-sudo cmake --install build
-```
-
-```bash
-cmake -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF -DCMAKE_INSTALL_PREFIX=~/mylibs .
-make -j
-make install
-```
-
-Then modify the `CMakeLists.txt` file
-
-```clike
-# Add the path to the library's CMake configuration files to CMAKE_PREFIX_PATH
-list(APPEND CMAKE_PREFIX_PATH "/path/to/library")
-
-# Find the package by name
-find_package(SEAL REQUIRED)
-
-# Include directories from the library
-include_directories(${LibraryName_INCLUDE_DIRS})
-```
-
 
 > *Note that SEAL has to be installed with transparent ciphertext checking turned off, as it is not possible in general to statically ensure a program will not produce a transparent ciphertext. This does not affect the security of ciphertexts encrypted with SEAL.*
 
@@ -207,10 +208,6 @@ The `compile` method transforms the program in-place and returns:
 
 
 
-
-
-
-
 1. the compiled program;
 2. encryption parameters for Microsoft SEAL with which the program can be executed;
 3. a signature object, that specifies how inputs and outputs need to be encoded and decoded.
@@ -264,6 +261,18 @@ from eva.metric import valuation_mse
 reference = evaluate(compiled_poly, inputs)
 print('MSE', valuation_mse(outputs, reference))
 ```
+
+
+## Circuit Benchmark
+
+In this modified version of EVA, we can benckmark the circuit to estimate the time and storage required for target circuit, note that timing analysis require a benckmark for benchmarking the computer preformance.
+
+### System Benchmark
+
+
+### Benchmark Circuit
+
+
 
 ## Contributing
 
