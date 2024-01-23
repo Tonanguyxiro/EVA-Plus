@@ -47,7 +47,7 @@ if(USE_GALOIS)
 endif()
 
 add_subdirectory(eva)
-# add_subdirectory(python)
+add_subdirectory(python)
 
 if(OpenMP_CXX_FOUND)
     target_link_libraries(eva PUBLIC OpenMP::OpenMP_CXX)
