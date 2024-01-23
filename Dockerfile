@@ -1,5 +1,8 @@
-# ubunutu is the base image
+#! Start build with command:
+#! docker build -t eva:latest .
 
+
+# ubunutu is the base image
 FROM ubuntu:22.04
 
 LABEL maintainer="Tong"
@@ -19,14 +22,14 @@ RUN echo "************************ Set up env ************************"
 RUN apt-get update && apt-get install -y ca-certificates && \
     apt-get update && apt-get install build-essential -y && \
     apt-get install -y cmake git openssh-server gdb pkg-config valgrind systemd-coredump && \
-    apt-get update && \
+    # apt-get update && \
     apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.10 python3.10-dev python3.10-distutils python3-pip && \
-    apt-get install -y autoconf automake libtool curl make g++ unzip && \
-    apt-get install -y libomp-dev && \
-    apt-get install -y fish
+    add-apt-repository ppa:deadsnakes/ppa
+    # apt-get update && \
+RUN apt-get install -y python3.10 python3.10-dev python3.10-distutils python3-pip
+RUN apt-get install -y autoconf automake libtool curl make g++ unzip
+RUN apt-get install -y libomp-dev
+RUN apt-get install -y fish
  
 RUN apt-get install -y clang && \
     update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100 && \
@@ -35,8 +38,19 @@ RUN apt-get install -y clang && \
 #* Install protobuf (v3.20.3)
 RUN echo "************************ protobuf ************************" && \
     apt-get install -y autoconf automake libtool curl make g++ unzip && \
-    cd /tmp && \
-    git clone https://github.com/google/protobuf.git && \
+    apt-get update && apt-get install -y net-tools
+    # 设置git最小和最大下我速度, 以下步骤大大加快git下载速度
+RUN git config --global http.lowSpeedLimit 0 && \
+    git config --global http.lowSpeedTime 999999 && \ 
+    git config --global core.compression -1 && \
+    export GIT_TRACE_PACKET=1 && \
+    export GIT_TRACE=1 && \
+    export GIT_CURL_VERBOSE=1
+    # ifconfig etho mtu 14000
+# RUN cd /tmp && \
+    # git clone https://github.com/google/protobuf.git
+COPY ./Temp/protobuf ./tmp/protobuf
+RUN cd /tmp && \
     cd protobuf && \
     git checkout v3.20.3 && \
     git submodule update --init --recursive && \
@@ -58,18 +72,28 @@ RUN echo "************************ SEAL ************************" && \
     make -j && \
     make install
 
-#* Install EVA
-COPY . ./EVA
-
-RUN echo "************************ EVA ************************" && \
-    cd EVA && \
-    git submodule update --init
-# RUN cmake . && \
-#     make -j
+# #* Install EVA
+RUN apt-get update && apt-get install -y libboost-all-dev
+RUN pip install numpy
+# COPY . ./EVA
+# 
+# RUN echo "************************ EVA ************************" && \
+#     cd EVA && \
+#     git submodule update --init
 
 # RUN cd EVA && \
+#     mkdir build && cd build && \
+#     cmake .. && \
+#     make -j
+
+# RUN cd EVA && cd build \
 #     python3 -m pip install -e python/ && \
 #     python3 tests/all.py
 
 #* Test
-RUN echo "************************ Test ************************"
+# RUN echo "************************ Test ************************"
+
+#! Run with:
+#! docker run -v $(pwd):/EVA -it --name eva eva:latest
+#! or start a existing container
+#! docker start -i eva
